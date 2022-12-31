@@ -1,43 +1,31 @@
 # Minecraft: Pi edition API Python Library
 
-`mcpi` Python library for communicating with [Minecraft: Pi edition](https://minecraft.net/en-us/edition/pi/) and [RaspberryJuice](https://github.com/zhuowei/RaspberryJuice).
+`mcpi-elci` Python library for communicating with [RaspberryJuice](https://github.com/zhuowei/RaspberryJuice) and [ELCI](#) (which implements some extra commands).
 
 ## Installation
 
 ### Windows
 
 ```
-pip3 install mcpi
+TODO
 ```
 
 ### Linux / MacOS
 
 ```bash
-sudo pip3 install mcpi
+TODO
 ```
 
 ## History
 
-The [Minecraft: Pi edition](https://minecraft.net/en-us/edition/pi/) Python library was originally created by Mojang and released with Minecraft: Pi edition.
-
-Initial supported was provided for Python 2 only, but during a sprint at PyconUK 2014 it was migrated to Python 3 and [py3minepi](https://github.com/py3minepi/py3minepi) was created.
-
-The ability to hack Minecraft from Python was very popular and the [RaspberryJuice](https://github.com/zhuowei/RaspberryJuice) plugin was created for Minecraft Java edition. RaspberryJuice also extended the API adding additional features.
-
-This python library supports Python 2 & 3 and Minecraft: Pi edition and RaspberryJuice.
-
-Documentation for the Minecraft: Pi edition and RaspberryJuice API's can be found at [www.stuffaboutcode.com/p/minecraft-api-reference.html](http://www.stuffaboutcode.com/p/minecraft-api-reference.html).
-
-It was released onto [PyPI](https://pypi.org) in May 2018.
-
-If you want some cool additional tools for modifying Minecraft, check out [minecraft-stuff](https://minecraft-stuff.readthedocs.io/en/latest/).
+See [original](https://github.com/martinohanlon/mcpi#history) for full history. This version implements the new commands as introduced by ELCI:
+- `doCommand`: support for ingame commands which requires a player to exist on the server
+- `getHeights`: support for efficiently getting the highest non-air block for a 2D area
+- `getBlocksWithData`: support for efficiently getting block `id` and `data` for a cuboid of blocks. 
 
 ## Sources
 
-This library is a collection of the following sources:
-
-+ [Minecraft: Pi edition](https://minecraft.net/en-us/edition/pi/)
-+ [Python 3 Minecraft: Pi edition library](https://github.com/py3minepi/py3minepi)
+See [original](https://github.com/martinohanlon/mcpi#sources).
 
 ## Licenses
 
