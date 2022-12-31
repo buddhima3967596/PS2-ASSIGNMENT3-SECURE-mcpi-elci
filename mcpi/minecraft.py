@@ -296,6 +296,11 @@ class Minecraft:
         s = self.conn.sendReceive(b"world.getBlocks", intFloor(args))
         return map(int, s.split(","))
 
+    def getBlocksWithData(self, *args):
+        """Get a cuboid of blocks (x0,y0,z0,x1,y1,z1) => [block:Block]"""
+        s = self.conn.sendReceive(b"world.getBlocksWithData", intFloor(args))
+        return list(map(lambda substr: Block(*map(int, substr.split(','))), s.split(';')))
+
     def setBlock(self, *args):
         """Set block (x,y,z,id,[data])"""
         self.conn.send(b"world.setBlock", intFloor(args))
@@ -326,6 +331,10 @@ class Minecraft:
         """Get the height of the world (x,z) => int"""
         return int(self.conn.sendReceive(b"world.getHeight", intFloor(args)))
 
+    def getHeights(self, *args):
+        """Get heights of the world between corners (x0, y0, x1, y1) => [height:int]"""
+        return list(map(int, self.conn.sendReceive(b"world.getHeights", intFloor(args)).split(",")))
+
     def getPlayerEntityIds(self):
         """Get the entity ids of the connected players => [id:int]"""
         ids = self.conn.sendReceive(b"world.getPlayerIds")
@@ -346,6 +355,10 @@ class Minecraft:
     def postToChat(self, msg):
         """Post a message to the game chat"""
         self.conn.send(b"chat.post", msg)
+
+    def doCommand(self, command):
+        """Perform an ingame command. Requires a player to join the server"""
+        self.conn.send(b"player.doCommand", command)
 
     def setting(self, setting, status):
         """Set a world setting (setting, status). keys: world_immutable, nametags_visible"""
