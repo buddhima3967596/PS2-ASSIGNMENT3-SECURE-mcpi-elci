@@ -1,4 +1,4 @@
-# Minecraft: Pi edition API Python Library
+# Minecraft: ELCI API Python library
 
 `mcpi-elci` Python library for communicating with [RaspberryJuice](https://github.com/zhuowei/RaspberryJuice) and [ELCI](#) (which implements some extra commands).
 
