@@ -24,14 +24,19 @@ class Connection:
     def perfromExchange(self):
         self.secure=Security()
         
-        public_key_encoded=self.secure.getMCPIPublicKeyEncoded()
+        public_key_encoded=self.secure.getMCPIPublicKey()
         
         # Send Public Key
-        self.socket.sendall(public_key_encoded)
+        print(base64.b64encode(public_key_encoded))
+        print(len(base64.b64encode(public_key_encoded)))
+        
+        
+        self.socket.send(base64.b64encode(public_key_encoded)+b'\n')
+        
         
         # Received Server Public Key
         serverPublicKeyBytes=self.socket.recv(4000)
-        self.secure.received_public_key(serverPublicKeyBytes)
+        self.secure.received_public_key(base64.b64decode(serverPublicKeyBytes))
         
         # Generate SharedSecre
         self.secure.generateSharedSecret()
@@ -42,9 +47,10 @@ class Connection:
         
         self.secure.getAuthenticationKey()
         
-        print(self.secure.sharedSecret)
-        print(self.secure.encryption_key)
-        print(self.secure.authentication_key)
+        print( "\nSHARED SECRET BASE64 " ,  base64.b64encode(self.secure.sharedSecret) )
+        print("\nSHARED SECRET BYTES " , self.secure.sharedSecret)
+        print("\nENCRYPTION KEY HEX " ,  self.secure.encryption_key.hex())
+        print("\nAUTH KEY HEX " ,  self.secure.authentication_key.hex())
         
         
         
@@ -71,8 +77,9 @@ class Connection:
         which is mildly distressing as it can't encode all of Unicode.
         """
 
-        s = b"".join([f, b"(", flatten_parameters_to_bytestring(data), b")", b"\n"])
-        
+        s = b"".join([f, b"(", flatten_parameters_to_bytestring(data), b")"])
+        print(s.decode('utf-8'))
+        print(s)
         self._send(s)
 
     def _send(self, s):
@@ -84,13 +91,16 @@ class Connection:
         self.lastSent = s
         
         s_encrypted=self.secure.aes_256_cbc_encrypt(s)
-        s_tag=self.secure.create_hmac_sha_256(s)
-        print(s_encrypted)
-        print(s_tag)
-        encrypted_tagged=s_tag+s_encrypted
-        byte_string=base64.b64encode(encrypted_tagged)
+        s_tag=self.secure.create_hmac_sha_256(s_encrypted)
+        print("ENCRYPTED BYTES LENGTH: " , len(s_encrypted))
+        print("ENCRYPTED HEX: " + s_encrypted.hex())
+        print("MAC TAG HEX: " + s_tag.hex())
+        print("MAC BYTES LENGTH: " , len(s_tag))
 
-        self.socket.sendall(byte_string)
+        string_final=base64.b64encode(s_tag+s_encrypted)
+
+       
+        self.socket.sendall(string_final+b'\n')
 
     def receive(self):
         """Receives data. Note that the trailing newline '\n' is trimmed"""

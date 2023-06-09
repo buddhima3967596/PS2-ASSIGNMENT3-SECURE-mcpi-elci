@@ -9,7 +9,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import dh
 import base64
-
+import socket
 # Assignment 3 main file
 # Feel free to modify, and/or to add other modules/classes in this or other files
 
@@ -140,8 +140,8 @@ class Security:
 
 # Getters
 
-    def getMCPIPublicKeyEncoded(self):
-        return base64.b64encode(self.mcpiPublicKey)
+    def getMCPIPublicKey(self):
+        return self.mcpiPublicKey
 
 
 
@@ -163,9 +163,10 @@ class Security:
 
 
     def received_public_key(self,server_public_key_bytes):
-        server_public_key_bytes=base64.b64decode(server_public_key_bytes)
-        # print(server_public_key_bytes)
+
+    
         
+        print("PUBLIC KEY BYTES SERVER: ", server_public_key_bytes)
         # Deserialize the server public key
         self.serverPublicKey= serialization.load_der_public_key(
             server_public_key_bytes,
@@ -179,75 +180,75 @@ class Security:
 
 
 
-# if __name__=="__main__":
+if __name__=="__main__":
     
-    # #  Establish Connection
-    # server_address = 'localhost'
-    # server_port = 4711
-    # mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # mcpi_socket.connect((server_address, server_port))
+    #  Establish Connection
+    server_address = 'localhost'
+    server_port = 4711
+    mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    mcpi_socket.connect((server_address, server_port))
 
     
     
     
-    # # 2 KEYS for AES-256-CBC and HMAC-SHA-256
-    # # Temporary until DH implementation
+    # 2 KEYS for AES-256-CBC and HMAC-SHA-256
+    # Temporary until DH implementation
     
-    # sharedSecret=mcpi_sec_dh.key_exchange(mcpi_socket)
-    # # print("sharedSecret:",sharedSecret.hex())
+    sharedSecret=mcpi_sec_dh.key_exchange(mcpi_socket)
+    # print("sharedSecret:",sharedSecret.hex())
 
 
-    # # mcpi_socket.close()
-    # encryption_key= getEncryptionKey(sharedSecret)
+    # mcpi_socket.close()
+    encryption_key= getEncryptionKey(sharedSecret)
 
-    # # print("ENCRYPTED KEY:",encryption_key.hex())
+    # print("ENCRYPTED KEY:",encryption_key.hex())
     
-    # authentication_key= getAuthenticationKey(sharedSecret)
+    authentication_key= getAuthenticationKey(sharedSecret)
      
-    # # print(authentication_key.hex())
+    # print(authentication_key.hex())
 
-    # #Encrypt Then Mac
-    # message_plain='bruh does this easdasdasdasdasdven work?'
+    #Encrypt Then Mac
+    message_plain='bruh does this easdasdasdasdasdven work?'
     
-    # # Convert the text to bytes
-    # message_bytes=message_plain.encode('utf-8')
+    # Convert the text to bytes
+    message_bytes=message_plain.encode('utf-8')
    
-    # # Encryption via AES 256 CBC
-    # encrypted_content=aes_256_cbc_encrypt(message_bytes,encryption_key)
-    # # print('ENCRYPTED CONTENT:',encrypted_content.hex())
-    # print(len(encrypted_content))
-    # # Create The Mac Tag 
-    # mac_tag=create_hmac_sha_256(encrypted_content,authentication_key)
+    # Encryption via AES 256 CBC
+    encrypted_content=aes_256_cbc_encrypt(message_bytes,encryption_key)
+    # print('ENCRYPTED CONTENT:',encrypted_content.hex())
+    print(len(encrypted_content))
+    # Create The Mac Tag 
+    mac_tag=create_hmac_sha_256(encrypted_content,authentication_key)
     
-    # encrypted_content_tagged=mac_tag+encrypted_content
-    # print(encrypted_content_tagged)
-    # print(len(encrypted_content_tagged))
-    # # mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # # mcpi_socket.connect((server_address,server_port))
+    encrypted_content_tagged=mac_tag+encrypted_content
+    print(encrypted_content_tagged)
+    print(len(encrypted_content_tagged))
+    # mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # mcpi_socket.connect((server_address,server_port))
 
             
-    # encrypted_content_string=base64.b64encode(encrypted_content_tagged)
-    # # print(encrypted_content_string)
-    # mcpi_socket.sendall(encrypted_content_string)
+    encrypted_content_string=base64.b64encode(encrypted_content_tagged)
+    # print(encrypted_content_string)
+    mcpi_socket.sendall(encrypted_content_string)
 
 
-    # # # print(encrypted_content)
-    # # # print(mac_tag)
-    # # #Transfer to server (For testing purposes)
-    # # received_encrypted_content=encrypted_content
+    # print(encrypted_content)
+    # print(mac_tag)
+    #Transfer to server (For testing purposes)
+    received_encrypted_content=encrypted_content
     
     
-    # # received_mac_tag= mac_tag 
+    received_mac_tag= mac_tag 
     
-    # # # Server verifies MAC --> if valid --> decryption else raise exception
+    # Server verifies MAC --> if valid --> decryption else raise exception
     
     
-    # # try:
-    # #     verify_hmac_256(received_mac_tag,received_encrypted_content,authentication_key)
-    # # except InvalidSignature:
-    # #      print("INVALID MAC TAG")
-    # # else:
-    # #     unencrypted_content=aes_256_cbc_decrypt(received_encrypted_content,encryption_key)
-    # #     if message_bytes==unencrypted_content:
-    # #         print("ENCRYPTION - DECRYPTION SUCCESFUL")
+    # try:
+    #     verify_hmac_256(received_mac_tag,received_encrypted_content,authentication_key)
+    # except InvalidSignature:
+    #      print("INVALID MAC TAG")
+    # else:
+    #     unencrypted_content=aes_256_cbc_decrypt(received_encrypted_content,encryption_key)
+    #     if message_bytes==unencrypted_content:
+    #         print("ENCRYPTION - DECRYPTION SUCCESFUL")
          
