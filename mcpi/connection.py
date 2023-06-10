@@ -26,7 +26,7 @@ class Connection:
         try:
             # Make Instance of the Security class to begin DH Key Exchange
             self.secure=Security()
-            
+        
             public_key_encoded=self.secure.getMCPIPublicKey()
             
             # Base64String + \n character for java Buffered Reader

@@ -124,8 +124,8 @@ class Security:
         padded_content= aes_256_cipher.decryptor().update(encrypted_content)
         
         # Removal of Padding 
-        
-        pkcs7_unpadding=padding.PKCS7(256).unpadder()
+        BLOCK_SIZE=256
+        pkcs7_unpadding=padding.PKCS7(BLOCK_SIZE).unpadder()
         
         unencrypted_content= pkcs7_unpadding.update(padded_content) + pkcs7_unpadding.finalize()
         
