@@ -17,20 +17,18 @@ class Connection:
     def __init__(self, address, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((address, port))
-        # self.secure=Security()
+        self.secure=None
         self.lastSent = ""
-        self.perfromExchange()
+        self.perfromExchange() # Start DH Key Exchange
         
     def perfromExchange(self):
+        # Make Instance of the Security class to begin DH Key Exchange
         self.secure=Security()
         
         public_key_encoded=self.secure.getMCPIPublicKey()
         
+        # Base64String + \n character for java Buffered Reader
         # Send Public Key
-        print(base64.b64encode(public_key_encoded))
-        print(len(base64.b64encode(public_key_encoded)))
-        
-        
         self.socket.send(base64.b64encode(public_key_encoded)+b'\n')
         
         
@@ -38,20 +36,15 @@ class Connection:
         serverPublicKeyBytes=self.socket.recv(4000)
         self.secure.received_public_key(base64.b64decode(serverPublicKeyBytes))
         
-        # Generate SharedSecre
+        # Generate SharedSecret 
         self.secure.generateSharedSecret()
         
-        # Derive Encryptiona and Authenthication Keys
+        # Derive Encryptiona and Authenthication Keys VIA HKDF Using The Shared Secret
         
         self.secure.getEncryptionKey()
         
         self.secure.getAuthenticationKey()
-        
-        print( "\nSHARED SECRET BASE64 " ,  base64.b64encode(self.secure.sharedSecret) )
-        print("\nSHARED SECRET BYTES " , self.secure.sharedSecret)
-        print("\nENCRYPTION KEY HEX " ,  self.secure.encryption_key.hex())
-        print("\nAUTH KEY HEX " ,  self.secure.authentication_key.hex())
-        
+       
         
         
         
@@ -77,9 +70,9 @@ class Connection:
         which is mildly distressing as it can't encode all of Unicode.
         """
 
+        # join output into byte string (append \n later)
         s = b"".join([f, b"(", flatten_parameters_to_bytestring(data), b")"])
-        print(s.decode('utf-8'))
-        print(s)
+
         self._send(s)
 
     def _send(self, s):
@@ -90,16 +83,15 @@ class Connection:
         self.drain()
         self.lastSent = s
         
+        # Encrypt output Via 
         s_encrypted=self.secure.aes_256_cbc_encrypt(s)
+        # Calculate MAC tag on encrypted output
         s_tag=self.secure.create_hmac_sha_256(s_encrypted)
-        print("ENCRYPTED BYTES LENGTH: " , len(s_encrypted))
-        print("ENCRYPTED HEX: " + s_encrypted.hex())
-        print("MAC TAG HEX: " + s_tag.hex())
-        print("MAC BYTES LENGTH: " , len(s_tag))
-
+        # Append MAC tag to beginning of the encrypted output
+        # Convert to base64string
         string_final=base64.b64encode(s_tag+s_encrypted)
 
-       
+        # Append \n for Java BufferedReader
         self.socket.sendall(string_final+b'\n')
 
     def receive(self):

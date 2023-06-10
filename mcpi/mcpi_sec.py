@@ -8,15 +8,14 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import dh
-import base64
-import socket
+
 # Assignment 3 main file
-# Feel free to modify, and/or to add other modules/classes in this or other files
+
+
 
 #Reference:
 ## Technical Dcoumentation
 # https://cryptography.io/en/latest/hazmat/primitives/asymmetric/dh/
-#https://cryptography.io/en/latest/hazmat/primitives/asymmetric/dh/
 #https://cryptography.io/en/latest/hazmat/primitives/asymmetric/serialization/
 #https://docs.oracle.com/javase/7/docs/technotes/guides/security/crypto/CryptoSpec.html#DH2Ex
 #https://pythontic.com/modules/socket/recv
@@ -29,12 +28,7 @@ import socket
 
 # Key Derivation VIA HKDF
 class Security:
-    mcpiPublicKey=None
-    mcpiPrivateKey=None
-    serverPublicKey=None
-    encryption_key=None
-    authentication_key=None
-    sharedSecret=None
+
     
     def __init__(self):
         self.mcpiPublicKey=None
@@ -45,6 +39,7 @@ class Security:
         self.intialize_key_exchange()
         self.sharedSecret=None
 
+    #  Key Derivation Via HKDF
     def getEncryptionKey(self):
         encryption_key_length= 32
         encryption_salt=b'encrypt_salt'
@@ -71,8 +66,10 @@ class Security:
         derived_authentication_key=derivation_function.derive(self.sharedSecret)
         self.authentication_key=derived_authentication_key
         
+    
+    # Encryption , Decryption Functions
     def aes_256_cbc_encrypt(self,content):   
-        # Pad the data
+        # Pad the data to the needed block size
         BLOCK_SIZE=256
         pkcs7_padding=padding.PKCS7(BLOCK_SIZE).padder()
         
@@ -102,7 +99,7 @@ class Security:
         
         
         
-        
+
 
     def verify_hmac_256(self,received_mac_tag,received_cipher_text):
         # Set up Hash Function SHA-256
@@ -138,7 +135,7 @@ class Security:
  
 
 
-# Getters
+# Key Exchange Functions
 
     def getMCPIPublicKey(self):
         return self.mcpiPublicKey
@@ -146,7 +143,11 @@ class Security:
 
 
     def intialize_key_exchange(self):
+       
         # RFC-3526 Prime Number and Generator
+        # https://www.ietf.org/rfc/rfc3526.txt
+        # Group ID: 14
+      
         P=0xFFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE45B3DC2007CB8A163BF0598DA48361C55D39A69163FA8FD24CF5F83655D23DCA3AD961C62F356208552BB9ED529077096966D670C354E4ABC9804F1746C08CA18217C32905E462E36CE3BE39E772C180E86039B2783A2EC07A28FB5C55DF06F4C52C9DE2BCBF6955817183995497CEA956AE515D2261898FA051015728E5A8AACAA68FFFFFFFFFFFFFFFF
         G=2
         
@@ -164,9 +165,6 @@ class Security:
 
     def received_public_key(self,server_public_key_bytes):
 
-    
-        
-        print("PUBLIC KEY BYTES SERVER: ", server_public_key_bytes)
         # Deserialize the server public key
         self.serverPublicKey= serialization.load_der_public_key(
             server_public_key_bytes,
@@ -181,74 +179,4 @@ class Security:
 
 
 if __name__=="__main__":
-    
-    #  Establish Connection
-    server_address = 'localhost'
-    server_port = 4711
-    mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    mcpi_socket.connect((server_address, server_port))
-
-    
-    
-    
-    # 2 KEYS for AES-256-CBC and HMAC-SHA-256
-    # Temporary until DH implementation
-    
-    sharedSecret=mcpi_sec_dh.key_exchange(mcpi_socket)
-    # print("sharedSecret:",sharedSecret.hex())
-
-
-    # mcpi_socket.close()
-    encryption_key= getEncryptionKey(sharedSecret)
-
-    # print("ENCRYPTED KEY:",encryption_key.hex())
-    
-    authentication_key= getAuthenticationKey(sharedSecret)
-     
-    # print(authentication_key.hex())
-
-    #Encrypt Then Mac
-    message_plain='bruh does this easdasdasdasdasdven work?'
-    
-    # Convert the text to bytes
-    message_bytes=message_plain.encode('utf-8')
-   
-    # Encryption via AES 256 CBC
-    encrypted_content=aes_256_cbc_encrypt(message_bytes,encryption_key)
-    # print('ENCRYPTED CONTENT:',encrypted_content.hex())
-    print(len(encrypted_content))
-    # Create The Mac Tag 
-    mac_tag=create_hmac_sha_256(encrypted_content,authentication_key)
-    
-    encrypted_content_tagged=mac_tag+encrypted_content
-    print(encrypted_content_tagged)
-    print(len(encrypted_content_tagged))
-    # mcpi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # mcpi_socket.connect((server_address,server_port))
-
-            
-    encrypted_content_string=base64.b64encode(encrypted_content_tagged)
-    # print(encrypted_content_string)
-    mcpi_socket.sendall(encrypted_content_string)
-
-
-    # print(encrypted_content)
-    # print(mac_tag)
-    #Transfer to server (For testing purposes)
-    received_encrypted_content=encrypted_content
-    
-    
-    received_mac_tag= mac_tag 
-    
-    # Server verifies MAC --> if valid --> decryption else raise exception
-    
-    
-    # try:
-    #     verify_hmac_256(received_mac_tag,received_encrypted_content,authentication_key)
-    # except InvalidSignature:
-    #      print("INVALID MAC TAG")
-    # else:
-    #     unencrypted_content=aes_256_cbc_decrypt(received_encrypted_content,encryption_key)
-    #     if message_bytes==unencrypted_content:
-    #         print("ENCRYPTION - DECRYPTION SUCCESFUL")
-         
+    pass
