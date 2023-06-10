@@ -177,6 +177,3 @@ class Security:
         self.sharedSecret=client_shared_key
 
 
-
-if __name__=="__main__":
-    pass

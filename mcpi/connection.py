@@ -35,7 +35,7 @@ class Connection:
             
             
             # Received Server Public Key
-            serverPublicKeyBytes=self.socket.recv(4000)
+            serverPublicKeyBytes=self.socket.recv(2000)
             self.secure.received_public_key(base64.b64decode(serverPublicKeyBytes))
             
             # Generate SharedSecret 
