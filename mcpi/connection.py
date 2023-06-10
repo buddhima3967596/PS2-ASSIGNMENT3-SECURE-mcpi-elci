@@ -22,30 +22,34 @@ class Connection:
         self.perfromExchange() # Start DH Key Exchange
         
     def perfromExchange(self):
-        # Make Instance of the Security class to begin DH Key Exchange
-        self.secure=Security()
         
-        public_key_encoded=self.secure.getMCPIPublicKey()
-        
-        # Base64String + \n character for java Buffered Reader
-        # Send Public Key
-        self.socket.send(base64.b64encode(public_key_encoded)+b'\n')
-        
-        
-        # Received Server Public Key
-        serverPublicKeyBytes=self.socket.recv(4000)
-        self.secure.received_public_key(base64.b64decode(serverPublicKeyBytes))
-        
-        # Generate SharedSecret 
-        self.secure.generateSharedSecret()
-        
-        # Derive Encryptiona and Authenthication Keys VIA HKDF Using The Shared Secret
-        
-        self.secure.getEncryptionKey()
-        
-        self.secure.getAuthenticationKey()
-       
-        
+        try:
+            # Make Instance of the Security class to begin DH Key Exchange
+            self.secure=Security()
+            
+            public_key_encoded=self.secure.getMCPIPublicKey()
+            
+            # Base64String + \n character for java Buffered Reader
+            # Send Public Key
+            self.socket.send(base64.b64encode(public_key_encoded)+b'\n')
+            
+            
+            # Received Server Public Key
+            serverPublicKeyBytes=self.socket.recv(4000)
+            self.secure.received_public_key(base64.b64decode(serverPublicKeyBytes))
+            
+            # Generate SharedSecret 
+            
+            self.secure.generateSharedSecret()
+            
+            # Derive Encryptiona and Authenthication Keys VIA HKDF Using The Shared Secret
+            
+            self.secure.getEncryptionKey()
+            
+            self.secure.getAuthenticationKey()
+        except:
+            print("Failed To Establish Secure Connection!")
+            
         
         
         
