@@ -70,8 +70,8 @@ class Security:
     # Encryption , Decryption Functions
     def aes_256_cbc_encrypt(self,content):   
         # Pad the data to the needed block size
-        BLOCK_SIZE=256
-        pkcs7_padding=padding.PKCS7(BLOCK_SIZE).padder()
+
+        pkcs7_padding=padding.PKCS7(AES.block_size).padder()
         
         padded_content=pkcs7_padding.update(content) + pkcs7_padding.finalize()
         
@@ -124,8 +124,7 @@ class Security:
         padded_content= aes_256_cipher.decryptor().update(encrypted_content)
         
         # Removal of Padding 
-        BLOCK_SIZE=256
-        pkcs7_unpadding=padding.PKCS7(BLOCK_SIZE).unpadder()
+        pkcs7_unpadding=padding.PKCS7(AES.block_size).unpadder()
         
         unencrypted_content= pkcs7_unpadding.update(padded_content) + pkcs7_unpadding.finalize()
         
